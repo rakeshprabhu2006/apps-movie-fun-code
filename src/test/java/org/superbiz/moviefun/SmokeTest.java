@@ -16,7 +16,7 @@ public class SmokeTest {
 
         assertThat(homePage, containsString("Please select one of the following links:"));
 
-        String setupPage = restTemplate.getForObject(url("/setup.jsp"), String.class);
+        String setupPage = restTemplate.getForObject(url("/setup"), String.class);
 
         assertThat(setupPage, containsString("Wedding Crashers"));
         assertThat(setupPage, containsString("Starsky & Hutch"));
@@ -25,7 +25,6 @@ public class SmokeTest {
         assertThat(setupPage, containsString("The Royal Tenenbaums"));
 
         String movieFunPage = restTemplate.getForObject(url("/moviefun"), String.class);
-
         assertThat(movieFunPage, containsString("Wedding Crashers"));
         assertThat(movieFunPage, containsString("David Dobkin"));
     }
