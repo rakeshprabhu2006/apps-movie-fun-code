@@ -17,7 +17,12 @@
 package org.superbiz.moviefun;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionOperations;
 import org.superbiz.moviefun.movies.Movie;
 import org.superbiz.moviefun.movies.MoviesBean;
 
@@ -41,6 +46,10 @@ public class ActionServlet extends HttpServlet {
 
     @EJB
     private MoviesBean moviesBean;
+    @Autowired
+    @Qualifier("transactionOperationsForMovies")
+    private TransactionOperations moviesOperations;
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -65,7 +74,12 @@ public class ActionServlet extends HttpServlet {
 
             Movie movie = new Movie(title, director, genre, rating, year);
 
-            moviesBean.addMovie(movie);
+            moviesOperations.execute(new TransactionCallbackWithoutResult() {
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    moviesBean.addMovie(movie);
+                }
+            });
+
             response.sendRedirect("moviefun");
             return;
 

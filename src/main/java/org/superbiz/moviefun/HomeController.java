@@ -1,6 +1,10 @@
 package org.superbiz.moviefun;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.superbiz.moviefun.albums.Album;
 import org.superbiz.moviefun.albums.AlbumFixtures;
@@ -18,12 +22,19 @@ public class HomeController {
     private final AlbumsBean albumsBean;
     private final MovieFixtures movieFixtures;
     private final AlbumFixtures albumFixtures;
+    private final TransactionOperations albumsOperations;
+    private final TransactionOperations moviesOperations;
 
-    public HomeController(MoviesBean moviesBean, AlbumsBean albumsBean, MovieFixtures movieFixtures, AlbumFixtures albumFixtures) {
+
+    public HomeController(MoviesBean moviesBean, AlbumsBean albumsBean, MovieFixtures movieFixtures, AlbumFixtures albumFixtures,
+                          @Qualifier("transactionOperationsForAlbums") TransactionOperations albumsOperations, @Qualifier("transactionOperationsForMovies") TransactionOperations moviesOperations) {
+
         this.moviesBean = moviesBean;
         this.albumsBean = albumsBean;
         this.movieFixtures = movieFixtures;
         this.albumFixtures = albumFixtures;
+        this.albumsOperations  = albumsOperations;
+        this.moviesOperations = moviesOperations;
     }
 
     @GetMapping("/")
@@ -33,14 +44,22 @@ public class HomeController {
 
     @GetMapping("/setup")
     public String setup(Map<String, Object> model) {
-        for (Movie movie : movieFixtures.load()) {
-            moviesBean.addMovie(movie);
-        }
 
-        for (Album album : albumFixtures.load()) {
-            albumsBean.addAlbum(album);
-        }
+        moviesOperations.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                for (Movie movie : movieFixtures.load()) {
+                    moviesBean.addMovie(movie);
+                }
+            }
+        });
 
+        albumsOperations.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                for (Album album : albumFixtures.load()) {
+                    albumsBean.addAlbum(album);
+                }
+            }
+        });
         model.put("movies", moviesBean.getMovies());
         model.put("albums", albumsBean.getAlbums());
 
