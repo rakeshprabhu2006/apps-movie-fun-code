@@ -1,6 +1,7 @@
 package org.superbiz.moviefun;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
@@ -48,16 +49,16 @@ public class Application {
 
     @Bean
     public DataSource albumsDataSource(DatabaseServiceCredentialsConfiguration serviceCredentials) {
-        MysqlDataSource dataSource = new MysqlDataSource();
-        dataSource.setURL(serviceCredentials.jdbcUrl("albums-mysql", "p-mysql"));
+        HikariDataSource dataSource = new HikariDataSource();
+        dataSource.setJdbcUrl(serviceCredentials.jdbcUrl("albums-mysql", "p-mysql"));
         return dataSource;
     }
 
 
     @Bean
     public DataSource moviesDataSource(DatabaseServiceCredentialsConfiguration serviceCredentials) {
-        MysqlDataSource dataSource = new MysqlDataSource();
-        dataSource.setURL(serviceCredentials.jdbcUrl("movies-mysql", "p-mysql"));
+        HikariDataSource dataSource = new HikariDataSource();
+        dataSource.setJdbcUrl(serviceCredentials.jdbcUrl("movies-mysql", "p-mysql"));
         return dataSource;
     }
 
